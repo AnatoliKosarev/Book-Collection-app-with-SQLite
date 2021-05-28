@@ -1,17 +1,17 @@
 from .database_connection import DatabaseConnection
-from sqlite3 import IntegrityError
+from .database_connection_with_cont_manager_decorator import database_connection, error_handler
 
 SQLITE_FILE_NAME = "data.db"
 MISSING_BOOK_MESSAGE = "\"{name}\" is not found in your book collection."
 
 
 def _connect_to_db(db_command, *args):
-    with DatabaseConnection(SQLITE_FILE_NAME) as cursor:
+    with database_connection(SQLITE_FILE_NAME) as cursor:
         cursor.execute(db_command, (*args,))
 
 
 def get_book_collection():
-    with DatabaseConnection(SQLITE_FILE_NAME) as cursor:
+    with database_connection(SQLITE_FILE_NAME) as cursor:
         cursor.execute("SELECT * FROM books")
         # fetchall() returns list of tuples [(name, author, read), (name, author, read)] - we transform it into dictionary
         books = [{"name": row[0], "author": row[1], "read": row[2]} for row in cursor.fetchall()]
@@ -26,13 +26,10 @@ def create_db_table():
     _connect_to_db("CREATE TABLE IF NOT EXISTS books (name text primary key, author text, read integer)")
 
 
+@error_handler()
 def add_book(name, author):
-    try:
-        _connect_to_db("INSERT INTO books VALUES(?, ?, 0)", name, author)
-        print(f"\"{name}\" by {author} was added to your book collection successfully!")
-    except IntegrityError:
-        print(f"\"{name}\" cannot be added to your collection. Book with the same name already exists in your "
-              f"collection.")
+    _connect_to_db("INSERT INTO books VALUES(?, ?, 0)", name, author)
+    print(f"\"{name}\" by {author} was added to your book collection successfully!")
 
 
 def mark_book_as_read(name):
