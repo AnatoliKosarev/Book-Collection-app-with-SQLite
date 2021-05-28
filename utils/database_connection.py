@@ -3,13 +3,13 @@ import sqlite3
 
 class DatabaseConnection:
 
-    def __init__(self, host):
+    def __init__(self, host: str):
         self.host = host
         self.connection = None
         self.cursor = None
 
     # is called when you go in context manager before you start running it
-    def __enter__(self):
+    def __enter__(self) -> sqlite3.Cursor:
         self.connection = sqlite3.connect(self.host)
         self.cursor = self.connection.cursor()
         return self.cursor

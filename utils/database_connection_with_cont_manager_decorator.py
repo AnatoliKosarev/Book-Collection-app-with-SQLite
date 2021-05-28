@@ -3,7 +3,7 @@ import sqlite3
 
 
 @contextmanager
-def database_connection(host):
+def database_connection(host: str):
     connection = sqlite3.connect(host)
     cursor = connection.cursor()
     try:
